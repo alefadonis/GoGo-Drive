@@ -1,17 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/dustin/go-humanize"
 	"github.com/julienschmidt/httprouter"
 )
 
 const UploadDir = "./data"
+
+type FileInfo struct {
+	Name string `json:"name"`
+	Size string  `json:"size"`
+}
 
 
 func handleError(err error, message string, w http.ResponseWriter, statusCode int) {
@@ -25,8 +33,30 @@ func homePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
 	fmt.Fprint(w, "Welcome to Go Go Drive!\n")
 }
 
-func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	files, err := ioutil.ReadDir(UploadDir)
+	handleError(err, "Failed to read the directory", w, http.StatusInternalServerError)
 	
+	var fileInfos []FileInfo
+	for _, file := range files {
+		if file.Name() == ".gitkeep" {
+			continue
+		}	
+
+		fileInfos = append(fileInfos, FileInfo{
+			Name: file.Name(),
+			Size: humanize.Bytes(uint64(file.Size())),
+		})
+	}
+
+	// Convert fileInfos to JSON
+	fileInfosJSON, err := json.Marshal(fileInfos)
+	handleError(err, "Failed to convert to JSON", w, http.StatusInternalServerError)
+	
+	// Set the response header and write the JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(fileInfosJSON)
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
