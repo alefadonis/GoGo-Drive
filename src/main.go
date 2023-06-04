@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/dustin/go-humanize"
 	"github.com/julienschmidt/httprouter"
@@ -83,11 +84,38 @@ func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
 	w.Write([]byte("File uploaded successfully!\n"))
 }
 
+func downloadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	fileName := ps.ByName("filename")
+	filePath := filepath.Join(UploadDir, fileName)
+
+	// Check if the file exists
+	_, err := os.Stat(filePath)
+	handleError(err, "File not found", w, http.StatusNotFound)
+
+	// Open the file
+	file, err := os.Open(filePath)
+	handleError(err, "Failed to open the file", w, http.StatusInternalServerError)
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	handleError(err, "Failed to get file information", w, http.StatusInternalServerError)
+
+	// Set the appropriate headers
+	w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
+	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+	w.Header().Set("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+
+	// Copy the file data to the response writer
+	_, err = io.Copy(w, file)
+	handleError(err, "Failed to write the file to the response", w, http.StatusInternalServerError)	
+}
+
 func handleRequests() {
 	router := httprouter.New()
 	router.GET("/", homePage)
 	router.GET("/files", listFiles)
 	router.POST("/upload", uploadFile)
+	router.GET("/download/:filename", downloadFile)
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
