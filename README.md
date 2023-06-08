@@ -12,7 +12,7 @@ This API provides endpoints to upload and download files.
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/your-repo.git
+   git clone git@github.com:AlefAdonis/GoGo-Drive.git
    ```
 2. Install dependencies
 
@@ -21,8 +21,13 @@ This API provides endpoints to upload and download files.
    ```
 
 3. Build and run the Go server:
+
    ```sh
-   go run main.go
+   cd GoGo-Drive
+   ```
+
+   ```sh
+   go run src/main.go
    ```
 
 ## Endpoints
