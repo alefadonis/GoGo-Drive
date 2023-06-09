@@ -3,6 +3,10 @@
 Concurrent Project Lab.
 This API provides endpoints to upload and download files.
 
+## Planning
+
+[Link to deliveries planning](https://docs.google.com/document/d/1yCEdzCiwON9m7ZTTcJZ1W4d2oVwjuQ9ezzgKpHltSDo/edit?usp=sharing).
+
 ## Dependencies
 
 - github.com/julienschmidt/httprouter - HTTP request router
