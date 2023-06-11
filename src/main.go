@@ -31,10 +31,12 @@ func handleError(err error, message string, w http.ResponseWriter, statusCode in
 }
 
 func homePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+	log.Println("[GET] /")
 	fmt.Fprint(w, "Welcome to Go Go Drive!\n")
 }
 
 func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Println("[GET] /files")
 	files, err := ioutil.ReadDir(UploadDir)
 	handleError(err, "Failed to read the directory", w, http.StatusInternalServerError)
 	
@@ -61,6 +63,8 @@ func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+	log.Println("[POST] /upload")
+
 	file, handler, err := r.FormFile("file")
 	handleError(err, "Failed to retrieve the file", w, http.StatusBadRequest)
 	defer file.Close()
@@ -86,6 +90,8 @@ func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
 
 func downloadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	fileName := ps.ByName("filename")
+	log.Println("[GET] /download/" + fileName)
+
 	filePath := filepath.Join(UploadDir, fileName)
 
 	// Check if the file exists
@@ -116,6 +122,8 @@ func handleRequests() {
 	router.GET("/files", listFiles)
 	router.POST("/upload", uploadFile)
 	router.GET("/download/:filename", downloadFile)
+
+	log.Println("Server running")
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
