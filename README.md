@@ -9,29 +9,24 @@ This API provides endpoints to upload and download files.
 
 ## Dependencies
 
-- github.com/julienschmidt/httprouter - HTTP request router
-- github.com/google/uuid - UUID generation
+- [Docker](https://docs.docker.com/desktop/install/linux-install/)
+- [Docker Compose](https://docs.docker.com/compose/install/linux/)
 
-## Setup
+## Run
 
 1. Clone the repository:
    ```sh
    git clone git@github.com:AlefAdonis/GoGo-Drive.git
    ```
-2. Install dependencies
-
-   ```
-   go get github.com/julienschmidt/httprouter github.com/google/uuid
-   ```
-
-3. Build and run the Go server:
+2. Go to project directory:
 
    ```sh
    cd GoGo-Drive
    ```
 
+3. Build & Run the server:
    ```sh
-   go run src/main.go
+   docker compose up
    ```
 
 ## Endpoints
