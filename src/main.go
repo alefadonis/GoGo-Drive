@@ -19,18 +19,17 @@ const UploadDir = "./data"
 
 type FileInfo struct {
 	Name string `json:"name"`
-	Size string  `json:"size"`
+	Size string `json:"size"`
 }
-
 
 func handleError(err error, message string, w http.ResponseWriter, statusCode int) {
 	if err != nil {
-		http.Error(w , "Failed to retrieve the file", statusCode)
+		http.Error(w, message, statusCode)
 		return
 	}
 }
 
-func homePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+func homePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Println("[GET] /")
 	fmt.Fprint(w, "Welcome to Go Go Drive!\n")
 }
@@ -39,12 +38,12 @@ func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Println("[GET] /files")
 	files, err := ioutil.ReadDir(UploadDir)
 	handleError(err, "Failed to read the directory", w, http.StatusInternalServerError)
-	
+
 	var fileInfos []FileInfo
 	for _, file := range files {
 		if file.Name() == ".gitkeep" {
 			continue
-		}	
+		}
 
 		fileInfos = append(fileInfos, FileInfo{
 			Name: file.Name(),
@@ -55,14 +54,14 @@ func listFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Convert fileInfos to JSON
 	fileInfosJSON, err := json.Marshal(fileInfos)
 	handleError(err, "Failed to convert to JSON", w, http.StatusInternalServerError)
-	
+
 	// Set the response header and write the JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(fileInfosJSON)
 }
 
-func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
+func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	log.Println("[POST] /upload")
 
 	file, handler, err := r.FormFile("file")
@@ -82,7 +81,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params){
 	// Copy the uploaded file to the destination file on the server
 	_, err = io.Copy(destinationFile, file)
 	handleError(err, "Failed to save the uploaded file", w, http.StatusInternalServerError)
-	
+
 	// Return a response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File uploaded successfully!\n"))
@@ -113,20 +112,50 @@ func downloadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	// Copy the file data to the response writer
 	_, err = io.Copy(w, file)
-	handleError(err, "Failed to write the file to the response", w, http.StatusInternalServerError)	
+	handleError(err, "Failed to write the file to the response", w, http.StatusInternalServerError)
 }
 
-func handleRequests() {
+func deleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	fileName := ps.ByName("filename")
+	log.Println("[DELETE] /delete/" + fileName)
+
+	if r.Method != http.MethodDelete {
+		http.Error(w, "MethodNotAllowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if fileName == "" {
+		http.Error(w, "Name of the file is empty", http.StatusBadRequest)
+		return
+	}
+
+	filePath := filepath.Join(UploadDir, fileName)
+	_, err := os.Stat(filePath)
+	handleError(err, fmt.Sprintf("File %s not found", fileName), w, http.StatusNotFound)
+
+	err_ := os.Remove(fileName)
+	if err_ != nil {
+		http.Error(w, fmt.Sprintf("Error deleting the file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	log.Printf("Arquivo %s excluído com sucesso.", fileName)
+}
+
+func HandleRequests() {
 	router := httprouter.New()
 	router.GET("/", homePage)
 	router.GET("/files", listFiles)
 	router.POST("/upload", uploadFile)
 	router.GET("/download/:filename", downloadFile)
+	router.POST("/delete/:filename", deleteFile)
 
 	log.Println("Server running")
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 
-func main(){
-	handleRequests()
+func main() {
+	HandleRequests()
 }
