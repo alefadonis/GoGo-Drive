@@ -132,16 +132,20 @@ func deleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	filePath := filepath.Join(UploadDir, fileName)
 	_, err := os.Stat(filePath)
-	handleError(err, fmt.Sprintf("File %s not found", fileName), w, http.StatusNotFound)
 
-	err_ := os.Remove(fileName)
-	if err_ != nil {
+	if err != nil {
+		handleError(err, fmt.Sprintf("File %s not found", fileName), w, http.StatusNotFound)
+		return
+	}
+
+	err = os.Remove(filePath)
+	if err != nil {
 		http.Error(w, fmt.Sprintf("Error deleting the file: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	log.Printf("Arquivo %s excluído com sucesso.", fileName)
+	w.Write([]byte("File deleted successfully!\n"))
 }
 
 func HandleRequests() {
@@ -150,9 +154,9 @@ func HandleRequests() {
 	router.GET("/files", listFiles)
 	router.POST("/upload", uploadFile)
 	router.GET("/download/:filename", downloadFile)
-	router.POST("/delete/:filename", deleteFile)
+	router.DELETE("/delete/:filename", deleteFile)
 
-	log.Println("Server running")
+	log.Println("Server running at port: 8081")
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
 

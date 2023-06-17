@@ -37,6 +37,8 @@ Endpoint: **POST /upload**
 
 Uploads a file to the server.
 
+If the file is not in the same directory, insert the full path to upload!
+
 Example:
 
 ```sh
