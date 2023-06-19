@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./api"
+	"./api/"
 	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
