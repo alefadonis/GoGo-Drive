@@ -37,6 +37,8 @@ Endpoint: **POST /upload**
 
 Uploads a file to the server.
 
+If the file is not in the same directory, insert the full path to upload!
+
 Example:
 
 ```sh
@@ -65,4 +67,16 @@ Example:
 
 ```sh
 curl -OJ localhost:8081/download/doc.txt
+```
+
+### Download File
+
+Endpoint: **DELETE /delete/:filename**
+
+Deletes a file with the specified filename.
+
+Example:
+
+```sh
+curl -X DELETE localhost:8081/delete/doc.txt
 ```
