@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod download
 
-RUN go build src/main.go
+RUN go build src/*.go
 
 EXPOSE 8081
 
