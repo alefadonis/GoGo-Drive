@@ -22,6 +22,7 @@ type FileInfo struct {
 	Size string `json:"size"`
 }
 
+// TODO TIRAR ESSE TRECO
 func handleError(err error, message string, w http.ResponseWriter, statusCode int) {
 	if err != nil {
 		http.Error(w, message, statusCode)
@@ -79,7 +80,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	defer destinationFile.Close()
 
 	// Copy the uploaded file to the destination file on the server
-	_, err = io.Copy(destinationFile, file)
+	_, err = io.Copy(destinationFile, file) // CRITIC REGION
 	handleError(err, "Failed to save the uploaded file", w, http.StatusInternalServerError)
 
 	// Return a response
@@ -126,7 +127,7 @@ func deleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	if fileName == "" {
-		http.Error(w, "Name of the file is empty", http.StatusBadRequest)
+		http.Error(w, "Filename is empty", http.StatusBadRequest)
 		return
 	}
 

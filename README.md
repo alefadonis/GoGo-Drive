@@ -71,7 +71,7 @@ curl -OJ localhost:8081/download/doc.txt
 
 ### Download File
 
-Endpoint: **GET /delete/:filename**
+Endpoint: **DELETE /delete/:filename**
 
 Deletes a file with the specified filename.
 
