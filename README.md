@@ -69,7 +69,7 @@ Example:
 curl -OJ localhost:8081/download/doc.txt
 ```
 
-### Download File
+### Delete File
 
 Endpoint: **DELETE /delete/:filename**
 
