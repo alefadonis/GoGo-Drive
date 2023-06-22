@@ -7,6 +7,6 @@ import (
 )
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	log.Println("[GET] /")
+	log.Println("[GET] /home")
 	fmt.Fprint(w, "Welcome to Go Go Drive!\n")
 }

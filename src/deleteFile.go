@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/julienschmidt/httprouter"
+	"strings"
 )
 
-func DeleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func DeleteFile(w http.ResponseWriter, r *http.Request) {
 
-	fileName := ps.ByName("filename")
+	urlParts := strings.Split(r.URL.Path, "/")
+	fileName := urlParts[len(urlParts)-1]
 	log.Println("[DELETE] /delete/" + fileName)
 
 	if r.Method != http.MethodDelete {
@@ -25,7 +25,7 @@ func DeleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	filePath := filepath.Join(UploadDir, fileName)
+	filePath := filepath.Join(BaseDir, fileName)
 	_, err := os.Stat(filePath)
 
 	if err != nil {

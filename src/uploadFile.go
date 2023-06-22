@@ -7,11 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/julienschmidt/httprouter"
 )
 
-func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func UploadFile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	log.Println("[POST] /upload")
 
@@ -25,9 +23,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	log.Printf("1 -  %s", handler.Filename)
 
-	filePath := filepath.Join(UploadDir, handler.Filename)
+	filePath := filepath.Join(BaseDir, handler.Filename)
 
-	// Create a new file on the server to save the uploaded file
 	destinationFile, err := os.Create(filePath)
 	if err != nil {
 		http.Error(w, "Failed to create the file on the server", http.StatusInternalServerError)
@@ -38,7 +35,6 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	defer destinationFile.Close()
 
-	// Copy the uploaded file to the destination file on the server
 	_, err = io.Copy(destinationFile, file)
 	if err != nil {
 		http.Error(w, "Failed to save the uploaded file", http.StatusInternalServerError)
@@ -47,7 +43,6 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	log.Printf("4 -  %s", handler.Filename)
 
-	// Return a response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File uploaded successfully!\n"))
 
