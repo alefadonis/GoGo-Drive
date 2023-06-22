@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func DownloadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func DeleteFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

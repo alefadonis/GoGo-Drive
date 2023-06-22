@@ -1,23 +1,36 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"fmt"
+	"html"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 )
 
-func HandleRequests() {
-	router := httprouter.New()
-	router.GET("/", HomePage)
-	router.GET("/files", ListFiles)
-	router.POST("/upload", UploadFile)
-	router.GET("/download/:filename", DownloadFile)
-	router.DELETE("/delete/:filename", DeleteFile)
+const BaseDir = "/gogo-drive"
 
-	log.Println("Server running at port: 8081")
-	log.Fatal(http.ListenAndServe(":8081", router))
+func createDir() {
+	homeDir, _ := os.UserHomeDir()
+	nameDir := filepath.Join(homeDir, "/gogo-drive")
+	err := os.MkdirAll(nameDir, 0755)
+	if err != nil {
+		log.Fatal("Failed to create the upload directory")
+		return
+	}
+	log.Println("Base Directory created successfully!")
 }
 
 func main() {
-	HandleRequests()
+	createDir()
+
+	http.HandleFunc("/", HomePage)
+
+	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	})
+
+	log.Println("Server running at port: 8081")
+	log.Fatal(http.ListenAndServe(":8081", http.FileServer(http.Dir("/usr/share/doc/gogo-drive"))))
 }

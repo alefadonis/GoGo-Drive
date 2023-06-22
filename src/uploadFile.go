@@ -6,11 +6,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	startTime := time.Now()
 	log.Println("[POST] /upload")
 
 	file, handler, err := r.FormFile("file")
@@ -21,11 +23,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	defer file.Close()
 
-	err = os.MkdirAll(UploadDir, os.ModePerm)
-	if err != nil {
-		http.Error(w, "Failed to create the upload directory", http.StatusInternalServerError)
-		return
-	}
+	log.Printf("1 -  %s", handler.Filename)
 
 	filePath := filepath.Join(UploadDir, handler.Filename)
 
@@ -36,6 +34,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 
+	log.Printf("3 -  %s", handler.Filename)
+
 	defer destinationFile.Close()
 
 	// Copy the uploaded file to the destination file on the server
@@ -45,7 +45,12 @@ func UploadFile(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 
+	log.Printf("4 -  %s", handler.Filename)
+
 	// Return a response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File uploaded successfully!\n"))
+
+	runtime := time.Since(startTime).Seconds()
+	log.Printf("Runtime upload %s: %.2fs\n", handler.Filename, runtime)
 }
