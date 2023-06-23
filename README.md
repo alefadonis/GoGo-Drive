@@ -1,18 +1,33 @@
-# GoGo-Drive
+<h1 align="center">  
+  GoGo-Drive
+</h1>
 
-Concurrent Project Lab.
-This API provides endpoints to upload and download files.
+<h3 align="center"> 
+  Álef Ádonis dos Santos Carlos | Crisley Venâncio Marques | Kilian Macedo Melcher
+</h3>
 
-## Planning
+<p align="center"> 
+	Project developed for the Concurrent Programming discipline. 
+</p>
+<p align="center"> 
+   <b>2022.2 | UFCG</b>
+</p>
+
+## Description 📋
+<p align="justify"> 
+   This API provides endpoints to upload and download files. It was inspired by the Google Drive file system management.
+</p>
+
+## Planning 🗓️
 
 [Link to deliveries planning](https://docs.google.com/document/d/1yCEdzCiwON9m7ZTTcJZ1W4d2oVwjuQ9ezzgKpHltSDo/edit?usp=sharing).
 
-## Dependencies
+## Dependencies 🧰
 
 - [Docker](https://docs.docker.com/desktop/install/linux-install/)
 - [Docker Compose](https://docs.docker.com/compose/install/linux/)
 
-## Run
+## Run ▶️
 
 1. Clone the repository:
    ```sh
@@ -29,7 +44,7 @@ This API provides endpoints to upload and download files.
    docker compose up
    ```
 
-## Endpoints
+## Endpoints 🏷️
 
 ### Upload File
 
@@ -37,7 +52,7 @@ Endpoint: **POST /upload**
 
 Uploads a file to the server.
 
-If the file is not in the same directory, insert the full path to upload!
+> If the file is not in the same directory, insert the full path to upload!
 
 Example:
 
