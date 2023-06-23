@@ -1,23 +1,63 @@
 package main
 
 import (
-	"github.com/julienschmidt/httprouter"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"runtime"
+	"sync"
+	"time"
 )
 
-func HandleRequests() {
-	router := httprouter.New()
-	router.GET("/", HomePage)
-	router.GET("/files", ListFiles)
-	router.POST("/upload", UploadFile)
-	router.GET("/download/:filename", DownloadFile)
-	router.DELETE("/delete/:filename", DeleteFile)
+var BaseDir = ""
 
-	log.Println("Server running at port: 8081")
-	log.Fatal(http.ListenAndServe(":8081", router))
+var DeleteInProgress sync.Map
+
+func PrintNumGoRoutines() {
+	for {
+		numGoRoutines := runtime.NumGoroutine()
+		if numGoRoutines > 2 {
+			log.Printf("Numero do goroutines %d/n", numGoRoutines)
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+func createDir() {
+	homeDir, _ := os.UserHomeDir()
+	BaseDir = filepath.Join(homeDir, "/gogo-drive")
+	err := os.MkdirAll(BaseDir, 0755)
+	if err != nil {
+		log.Fatal("Failed to create the upload directory")
+		return
+	}
+	log.Println("Base directory created at", BaseDir)
 }
 
 func main() {
-	HandleRequests()
+	//go PrintNumGoRoutines()
+	createDir()
+
+	mux := http.NewServeMux()
+
+	go func() { mux.HandleFunc("/", HomePage) }()
+	go func() { mux.HandleFunc("/files", ListFiles) }()
+
+	go func() { mux.HandleFunc("/upload", UploadFile) }()
+
+	go func() { mux.HandleFunc("/download/", DownloadFile) }()
+
+	go func() { mux.HandleFunc("/delete/", DeleteFile) }()
+
+	log.Println("Server running at port: 8081")
+	err := http.ListenAndServe(":8081", mux)
+
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("Error starting server: %s\n", err)
+		os.Exit(1)
+	}
 }

@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/julienschmidt/httprouter"
 )
 
-func HomePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	log.Println("[GET] /")
+func HomePage(w http.ResponseWriter, r *http.Request) {
+	log.Println("[GET] /home")
 	fmt.Fprint(w, "Welcome to Go Go Drive!\n")
 }

@@ -7,12 +7,11 @@ import (
 	"net/http"
 
 	"github.com/dustin/go-humanize"
-	"github.com/julienschmidt/httprouter"
 )
 
-func ListFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func ListFiles(w http.ResponseWriter, r *http.Request) {
 	log.Println("[GET] /files")
-	files, err := ioutil.ReadDir(UploadDir)
+	files, err := ioutil.ReadDir(BaseDir)
 
 	if err != nil {
 		http.Error(w, "Failed to read the directory", http.StatusInternalServerError)
@@ -31,7 +30,6 @@ func ListFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		})
 	}
 
-	// Convert fileInfos to JSON
 	fileInfosJSON, err := json.Marshal(fileInfos)
 
 	if err != nil {
@@ -39,7 +37,6 @@ func ListFiles(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 
-	// Set the response header and write the JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(fileInfosJSON)
