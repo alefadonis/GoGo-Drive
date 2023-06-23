@@ -8,10 +8,14 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 )
 
 var BaseDir = ""
+
+var MutexDeleteDownload sync.Mutex
+var ChannelDelete chan string
 
 func PrintNumGoRoutines() {
 	for {
@@ -36,6 +40,7 @@ func createDir() {
 func main() {
 	//go PrintNumGoRoutines()
 	createDir()
+	ChannelDelete = make(chan string)
 
 	mux := http.NewServeMux()
 

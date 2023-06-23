@@ -7,7 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
+
+var mutexDelete sync.Mutex
 
 func DeleteFile(w http.ResponseWriter, r *http.Request) {
 
@@ -26,18 +29,28 @@ func DeleteFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filePath := filepath.Join(BaseDir, fileName)
-	_, err := os.Stat(filePath)
 
+	mutexDelete.Lock()
+
+	ChannelDelete <- fileName
+
+	_, err := os.Stat(filePath)
 	if err != nil {
+		<-ChannelDelete
+		mutexDelete.Unlock()
 		http.Error(w, fmt.Sprintf("File %s not found", fileName), http.StatusNotFound)
 		return
 	}
 
 	err = os.Remove(filePath)
 	if err != nil {
+		<-ChannelDelete
+		mutexDelete.Unlock()
 		http.Error(w, fmt.Sprintf("Error deleting the file: %v", err), http.StatusInternalServerError)
 		return
 	}
+	<-ChannelDelete
+	mutexDelete.Unlock()
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File deleted successfully!\n"))
