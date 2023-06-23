@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,19 +25,24 @@ func createDir() {
 func main() {
 	createDir()
 
-	http.HandleFunc("/", HomePage)
-	http.HandleFunc("/files", ListFiles)
-	// http.HandleFunc("/upload", UploadFile)
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
-		go func(w http.ResponseWriter, r *http.Request) {
-			UploadFile(w, r)
-		}(w, r)
-	})
+	go func() { mux.HandleFunc("/", HomePage) }()
+	go func() { mux.HandleFunc("/files", ListFiles) }()
 
-	http.HandleFunc("/download/", DownloadFile)
-	http.HandleFunc("/delete/", DeleteFile)
+	go func() { mux.HandleFunc("/upload", UploadFile) }()
+
+	go func() { mux.HandleFunc("/download/", DownloadFile) }()
+
+	go func() { mux.HandleFunc("/delete/", DeleteFile) }()
 
 	log.Println("Server running at port: 8081")
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	err := http.ListenAndServe(":8081", mux)
+
+	if errors.Is(err, http.ErrServerClosed) {
+		fmt.Printf("server closed\n")
+	} else if err != nil {
+		fmt.Printf("Error starting server: %s\n", err)
+		os.Exit(1)
+	}
 }
