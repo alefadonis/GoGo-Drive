@@ -25,28 +25,24 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	defer file.Close()
 
-	log.Printf("1 -  %s", handler.Filename)
-
 	filePath := filepath.Join(BaseDir, handler.Filename)
-
-	log.Printf("2 -  %s", handler.Filename)
 
 	mutexUpload.Lock()
 	_, err = os.Stat(filePath)
 	if err == nil {
+		mutexUpload.Unlock()
 		http.Error(w, fmt.Sprintf("File %s alredy exists in the base directory.", filePath), http.StatusNotFound)
 		return
 	}
 
 	destinationFile, err := os.Create(filePath)
 	if err != nil {
+		mutexUpload.Unlock()
 		http.Error(w, "Failed to create the file on the server", http.StatusInternalServerError)
 		return
 	}
 
 	mutexUpload.Unlock()
-
-	log.Printf("3 -  %s", handler.Filename)
 
 	defer destinationFile.Close()
 
@@ -55,8 +51,6 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to save the uploaded file", http.StatusInternalServerError)
 		return
 	}
-
-	log.Printf("4 -  %s", handler.Filename)
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File uploaded successfully!\n"))
