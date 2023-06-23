@@ -25,7 +25,14 @@ func main() {
 
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/files", ListFiles)
-	http.HandleFunc("/upload", UploadFile)
+	// http.HandleFunc("/upload", UploadFile)
+
+	http.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		go func(w http.ResponseWriter, r *http.Request) {
+			UploadFile(w, r)
+		}(w, r)
+	})
+
 	http.HandleFunc("/download/", DownloadFile)
 	http.HandleFunc("/delete/", DeleteFile)
 

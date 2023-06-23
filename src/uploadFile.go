@@ -25,6 +25,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	filePath := filepath.Join(BaseDir, handler.Filename)
 
+	log.Printf("2 -  %s", handler.Filename)
+
 	destinationFile, err := os.Create(filePath)
 	if err != nil {
 		http.Error(w, "Failed to create the file on the server", http.StatusInternalServerError)
