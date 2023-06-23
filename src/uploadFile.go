@@ -7,22 +7,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
+
+var mutexUpload sync.Mutex
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	log.Println("[POST] /upload")
-
-	for {
-		upload, ok := <-UploadChannel
-
-		if !ok {
-			return
-		}
-
-		fmt.Println(upload)
-	}
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
@@ -38,6 +31,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("2 -  %s", handler.Filename)
 
+	mutexUpload.Lock()
 	_, err = os.Stat(filePath)
 	if err == nil {
 		http.Error(w, fmt.Sprintf("File %s alredy exists in the base directory.", filePath), http.StatusNotFound)
@@ -49,6 +43,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create the file on the server", http.StatusInternalServerError)
 		return
 	}
+
+	mutexUpload.Unlock()
 
 	log.Printf("3 -  %s", handler.Filename)
 

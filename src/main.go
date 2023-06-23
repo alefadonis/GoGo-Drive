@@ -12,7 +12,6 @@ import (
 )
 
 var BaseDir = ""
-var UploadChannel chan int
 
 func PrintNumGoRoutines() {
 	for {
@@ -35,12 +34,10 @@ func createDir() {
 }
 
 func main() {
-	go PrintNumGoRoutines()
+	//go PrintNumGoRoutines()
 	createDir()
 
 	mux := http.NewServeMux()
-
-	UploadChannel = make(chan int)
 
 	go func() { mux.HandleFunc("/", HomePage) }()
 	go func() { mux.HandleFunc("/files", ListFiles) }()
