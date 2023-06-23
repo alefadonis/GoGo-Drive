@@ -8,7 +8,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 )
+
+var mutexDownload sync.Mutex
 
 func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	urlParts := strings.Split(r.URL.Path, "/")
@@ -18,25 +21,29 @@ func DownloadFile(w http.ResponseWriter, r *http.Request) {
 
 	filePath := filepath.Join(BaseDir, fileName)
 
-	_, err := os.Stat(filePath)
+	mutexDownload.Lock()
+	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		http.Error(w, "File not found", http.StatusNotFound)
+		http.Error(w, "Error retriveing file", http.StatusNotFound)
 		return
 	}
 
+	if _, ok := DeleteInProgress.Load(0); ok {
+		mutexDownload.Unlock()
+		http.Error(w, "Delete in progress, cannot download the file", http.StatusForbidden)
+		return
+	}
+
+	DeleteInProgress.Store(1, true)
 	file, err := os.Open(filePath)
 	if err != nil {
+		mutexDownload.Unlock()
 		http.Error(w, "Failed to open the file", http.StatusInternalServerError)
 		return
 	}
-
+	DeleteInProgress.Store(1, false)
+	mutexDownload.Unlock()
 	defer file.Close()
-
-	fileInfo, err := file.Stat()
-	if err != nil {
-		http.Error(w, "Failed to get file information", http.StatusInternalServerError)
-		return
-	}
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
