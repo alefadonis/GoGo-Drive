@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -12,6 +13,16 @@ import (
 func UploadFile(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()
 	log.Println("[POST] /upload")
+
+	for {
+		upload, ok := <-UploadChannel
+
+		if !ok {
+			return
+		}
+
+		fmt.Println(upload)
+	}
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
@@ -26,6 +37,12 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join(BaseDir, handler.Filename)
 
 	log.Printf("2 -  %s", handler.Filename)
+
+	_, err = os.Stat(filePath)
+	if err == nil {
+		http.Error(w, fmt.Sprintf("File %s alredy exists in the base directory.", filePath), http.StatusNotFound)
+		return
+	}
 
 	destinationFile, err := os.Create(filePath)
 	if err != nil {

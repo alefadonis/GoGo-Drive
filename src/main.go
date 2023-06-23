@@ -7,10 +7,22 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"time"
 )
 
 var BaseDir = ""
+var UploadChannel chan int
 
+func PrintNumGoRoutines() {
+	for {
+		numGoRoutines := runtime.NumGoroutine()
+		if numGoRoutines > 2 {
+			log.Printf("Numero do goroutines %d/n", numGoRoutines)
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
 func createDir() {
 	homeDir, _ := os.UserHomeDir()
 	BaseDir = filepath.Join(homeDir, "/gogo-drive")
@@ -23,9 +35,12 @@ func createDir() {
 }
 
 func main() {
+	go PrintNumGoRoutines()
 	createDir()
 
 	mux := http.NewServeMux()
+
+	UploadChannel = make(chan int)
 
 	go func() { mux.HandleFunc("/", HomePage) }()
 	go func() { mux.HandleFunc("/files", ListFiles) }()
