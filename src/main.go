@@ -7,24 +7,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sync"
-	"time"
 )
 
 var BaseDir = ""
 
 var DeleteInProgress sync.Map
 
-func PrintNumGoRoutines() {
-	for {
-		numGoRoutines := runtime.NumGoroutine()
-		if numGoRoutines > 2 {
-			log.Printf("Numero do goroutines %d/n", numGoRoutines)
-		}
-		time.Sleep(1 * time.Second)
-	}
-}
 func createDir() {
 	homeDir, _ := os.UserHomeDir()
 	BaseDir = filepath.Join(homeDir, "/gogo-drive")
@@ -37,18 +26,14 @@ func createDir() {
 }
 
 func main() {
-	//go PrintNumGoRoutines()
 	createDir()
 
 	mux := http.NewServeMux()
 
 	go func() { mux.HandleFunc("/", HomePage) }()
 	go func() { mux.HandleFunc("/files", ListFiles) }()
-
 	go func() { mux.HandleFunc("/upload", UploadFile) }()
-
 	go func() { mux.HandleFunc("/download/", DownloadFile) }()
-
 	go func() { mux.HandleFunc("/delete/", DeleteFile) }()
 
 	log.Println("Server running at port: 8081")
