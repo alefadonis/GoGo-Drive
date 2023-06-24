@@ -41,9 +41,20 @@
 
 3. Build & Run the server:
    ```sh
-   docker compose up
+   go build src/*.go && go run src/*.go
    ```
 
+4. Run testes:
+
+   > You should open a new instance of your terminal and the server must be online.
+   ```
+   ./tests.sh
+   ```
+
+> If you wanna try run the server with a docker. Try:
+```
+   sudo docker compose up
+```
 ## Endpoints 🏷️
 
 ### Upload File
