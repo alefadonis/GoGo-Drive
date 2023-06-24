@@ -40,14 +40,20 @@ func DeleteFile(w http.ResponseWriter, r *http.Request) {
 	mutexDelete.Lock()
 	_, err := os.Stat(filePath)
 	if err != nil {
+
+		DeleteInProgress.Store(0, false)
 		mutexDelete.Unlock()
+
 		http.Error(w, fmt.Sprintf("File %s not found", fileName), http.StatusNotFound)
 		return
 	}
 
 	err = os.Remove(filePath)
 	if err != nil {
+
+		DeleteInProgress.Store(0, false)
 		mutexDelete.Unlock()
+
 		http.Error(w, fmt.Sprintf("Error deleting the file: %v", err), http.StatusInternalServerError)
 		return
 	}

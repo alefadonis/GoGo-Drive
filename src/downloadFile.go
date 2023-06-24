@@ -22,14 +22,22 @@ func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join(BaseDir, fileName)
 
 	mutexDownload.Lock()
+
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
+
+		DeleteInProgress.Store(1, false)
+		mutexDownload.Unlock()
+
 		http.Error(w, "Error retriveing file", http.StatusNotFound)
 		return
 	}
 
 	if _, ok := DeleteInProgress.Load(0); ok {
+
+		DeleteInProgress.Store(1, false)
 		mutexDownload.Unlock()
+
 		http.Error(w, "Delete in progress, cannot download the file", http.StatusForbidden)
 		return
 	}
@@ -37,12 +45,17 @@ func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	DeleteInProgress.Store(1, true)
 	file, err := os.Open(filePath)
 	if err != nil {
+
+		DeleteInProgress.Store(1, false)
 		mutexDownload.Unlock()
+
 		http.Error(w, "Failed to open the file", http.StatusInternalServerError)
 		return
 	}
+
 	DeleteInProgress.Store(1, false)
 	mutexDownload.Unlock()
+
 	defer file.Close()
 
 	w.Header().Set("Content-Disposition", "attachment; filename="+fileName)
